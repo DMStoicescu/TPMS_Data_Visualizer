@@ -93,14 +93,16 @@ public class DeviceDetailsActivity extends AppCompatActivity {
         device.setContent(device_description);
         device.setTimestamp(Timestamp.now());
 
-        ArrayList<String> checkedSensors = new ArrayList<>();
-        for(int i=0; i<sensorListView.getCount(); i++){
-            if(sensorListView.isItemChecked(i)){
-                checkedSensors.add(sensorListView.getItemAtPosition(i).toString());
+        if(!isViewMode) {
+            ArrayList<String> checkedSensors = new ArrayList<>();
+            for (int i = 0; i < sensorListView.getCount(); i++) {
+                if (sensorListView.isItemChecked(i)) {
+                    checkedSensors.add(sensorListView.getItemAtPosition(i).toString());
+                }
             }
-        }
 
-        device.setCheckedSensorsArray(checkedSensors);
+            device.setCheckedSensorsArray(checkedSensors);
+        }
 
         saveDeviceToFirebase(device);
     }
