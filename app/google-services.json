@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "528998522774",
+    "firebase_url": "https://tpmsvisualizer-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "tpmsvisualizer",
+    "storage_bucket": "tpmsvisualizer.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:528998522774:android:8a3b24110abed8d1a9c7b7",
+        "android_client_info": {
+          "package_name": "com.example.tpms_data_visualizer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDAHpooXnLKexXA704phuB9wc-5FTVY2X0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
