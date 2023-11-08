@@ -4,9 +4,12 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -15,6 +18,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 public class DeviceDetailsActivity extends AppCompatActivity {
@@ -27,6 +31,10 @@ public class DeviceDetailsActivity extends AppCompatActivity {
     String title,content,docId;
     boolean isViewMode = false;
 
+    String[] testArray = {"Sensor1","Sensor2","Sensor3","Sensor4","Sensor5","Sensor6"};
+    ListView sensorListView;
+    ArrayAdapter<String> listAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,6 +45,7 @@ public class DeviceDetailsActivity extends AppCompatActivity {
         saveDeviceButton = findViewById(R.id.save_device_btn);
         titleDeviceTextView = findViewById(R.id.new_device);
         deleteDeviceButton = findViewById(R.id.delete_device_btn);
+        sensorListView = findViewById(R.id.sensor_list_options);
 
         //Receive data logic
         title = getIntent().getStringExtra("title");
@@ -53,6 +62,11 @@ public class DeviceDetailsActivity extends AppCompatActivity {
         if(isViewMode){
             titleDeviceTextView.setText("Device: " + title);
             deleteDeviceButton.setVisibility(View.VISIBLE);
+            sensorListView.setVisibility(View.GONE);
+        }
+        else {
+            listAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_multiple_choice, testArray);
+            sensorListView.setAdapter(listAdapter);
         }
 
         //Buttons logic
@@ -78,6 +92,15 @@ public class DeviceDetailsActivity extends AppCompatActivity {
         device.setTitle(device_title);
         device.setContent(device_description);
         device.setTimestamp(Timestamp.now());
+
+        ArrayList<String> checkedSensors = new ArrayList<>();
+        for(int i=0; i<sensorListView.getCount(); i++){
+            if(sensorListView.isItemChecked(i)){
+                checkedSensors.add(sensorListView.getItemAtPosition(i).toString());
+            }
+        }
+
+        device.setCheckedSensorsArray(checkedSensors);
 
         saveDeviceToFirebase(device);
     }

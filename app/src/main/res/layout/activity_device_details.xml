@@ -76,6 +76,13 @@
 <!--            android:background="@android:drawable/btn_dropdown"-->
 <!--            android:spinnerMode="dropdown"-->
 <!--            />-->
+        
+            <ListView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/sensor_list_options"
+                android:choiceMode="multipleChoice"
+                android:visibility="visible"/>
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
