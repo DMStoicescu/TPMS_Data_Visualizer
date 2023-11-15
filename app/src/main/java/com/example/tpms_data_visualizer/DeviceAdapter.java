@@ -3,6 +3,7 @@ package com.example.tpms_data_visualizer;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +32,7 @@ public class DeviceAdapter extends FirestoreRecyclerAdapter<Device, DeviceAdapte
             Intent intent = new Intent(context, DeviceDetailsActivity.class);
             intent.putExtra("title", device.title);
             intent.putExtra("content", device.content);
+            intent.putStringArrayListExtra("checkedSensorsArray", device.checkedSensorsArray);
             String docId = this.getSnapshots().getSnapshot(position).getId();
             intent.putExtra("docId", docId);
             context.startActivity(intent);

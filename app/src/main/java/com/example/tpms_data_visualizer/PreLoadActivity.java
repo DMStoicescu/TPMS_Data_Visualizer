@@ -19,6 +19,6 @@ public class PreLoadActivity extends AppCompatActivity {
                 startActivity(new Intent(PreLoadActivity.this, MainActivity.class));
                 finish();
             }
-        }, 4000);
+        }, 3000);
     }
 }

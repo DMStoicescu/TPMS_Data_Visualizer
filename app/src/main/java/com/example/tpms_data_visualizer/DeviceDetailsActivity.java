@@ -41,6 +41,8 @@ public class DeviceDetailsActivity extends AppCompatActivity {
     ListView sensorListView;
     ArrayAdapter<String> listAdapter;
 
+    ArrayList<String> checkedSensors;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +76,10 @@ public class DeviceDetailsActivity extends AppCompatActivity {
             deleteDeviceButton.setVisibility(View.VISIBLE);
             sensorListTitle.setVisibility(View.GONE);
             sensorListView.setVisibility(View.GONE);
+
+            //Retrieve sensor data
+            checkedSensors = getIntent().getStringArrayListExtra("checkedSensorsArray");
+
 
         }
 
@@ -134,15 +140,15 @@ public class DeviceDetailsActivity extends AppCompatActivity {
         device.setTimestamp(Timestamp.now());
 
         if(!isViewMode) {
-            ArrayList<String> checkedSensors = new ArrayList<>();
+            checkedSensors = new ArrayList<>();
             for (int i = 0; i < sensorListView.getCount(); i++) {
                 if (sensorListView.isItemChecked(i)) {
                     checkedSensors.add(sensorListView.getItemAtPosition(i).toString());
                 }
             }
-
-            device.setCheckedSensorsArray(checkedSensors);
         }
+
+        device.setCheckedSensorsArray(checkedSensors);
 
 
         saveDeviceToFirebase(device);
