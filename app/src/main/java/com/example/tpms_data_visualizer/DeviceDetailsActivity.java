@@ -18,6 +18,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -27,13 +30,17 @@ public class DeviceDetailsActivity extends AppCompatActivity {
     //TODO add the content
     ImageButton saveDeviceButton;
     FloatingActionButton deleteDeviceButton;
-    TextView titleDeviceTextView;
+    TextView titleDeviceTextView, sensorListTitle;
     String title,content,docId;
     boolean isViewMode = false;
 
+    //Database and population related variables
+    Connection connectToDb = null;
     String[] testArray = {"Sensor1","Sensor2","Sensor3","Sensor4","Sensor5","Sensor6"};
+    ArrayList <String> receivedSensorsId = new ArrayList<String>();
     ListView sensorListView;
     ArrayAdapter<String> listAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +52,10 @@ public class DeviceDetailsActivity extends AppCompatActivity {
         saveDeviceButton = findViewById(R.id.save_device_btn);
         titleDeviceTextView = findViewById(R.id.new_device);
         deleteDeviceButton = findViewById(R.id.delete_device_btn);
+        sensorListTitle = findViewById(R.id.sensor_list_title);
         sensorListView = findViewById(R.id.sensor_list_options);
+
+
 
         //Receive data logic
         title = getIntent().getStringExtra("title");
@@ -62,13 +72,43 @@ public class DeviceDetailsActivity extends AppCompatActivity {
         if(isViewMode){
             titleDeviceTextView.setText("Device: " + title);
             deleteDeviceButton.setVisibility(View.VISIBLE);
+            sensorListTitle.setVisibility(View.GONE);
             sensorListView.setVisibility(View.GONE);
-        }
-        else {
-            listAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_multiple_choice, testArray);
-            sensorListView.setAdapter(listAdapter);
+
         }
 
+        //Logic if we are in create mode
+        else {
+            //Logic for database query to retrieve unique sensor id:
+            try {
+                //Connect to database and query it for unique sensor id
+                ConnectionHelper connectionHelper = new ConnectionHelper();
+                connectToDb = connectionHelper.getConnection();
+                String dbGetSensorsIdQuery = "SELECT DISTINCT id FROM TPMSData";
+                Statement st = connectToDb.createStatement();
+                ResultSet resSet = st.executeQuery(dbGetSensorsIdQuery);
+                //Append the sensors to the sensorID list
+                while(resSet.next()){
+                    receivedSensorsId.add(resSet.getString(1));
+                }
+            }
+            catch (Exception ex){
+                Utility.showToast(DeviceDetailsActivity.this, "Could not retrieve data, check internet connection");
+            }
+
+            //If there are any received sensorsID display them otherwise display dummy data
+            if (!receivedSensorsId.isEmpty()) {
+                listAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_multiple_choice, receivedSensorsId);
+            }
+            else {
+                listAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_multiple_choice, testArray);
+
+            }
+
+            //Update the sensorListView with the right ListAdapter
+            sensorListView.setAdapter(listAdapter);
+
+        }
         //Buttons logic
         saveDeviceButton.setOnClickListener((v -> saveDevice()));
         deleteDeviceButton.setOnClickListener((v -> deleteDeviceFromFirebase()));
@@ -103,6 +143,7 @@ public class DeviceDetailsActivity extends AppCompatActivity {
 
             device.setCheckedSensorsArray(checkedSensors);
         }
+
 
         saveDeviceToFirebase(device);
     }
