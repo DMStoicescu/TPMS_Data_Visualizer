@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">TPMS-Visualizer</string>
     <string name="devices">My devices</string>
+    <string name="description">Description</string>
+    <string name="device_name_filler">Device Name...</string>
+    <string name="add_new_vehicle">Add new vehicle</string>
 </resources>

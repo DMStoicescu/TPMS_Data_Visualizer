@@ -17,7 +17,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/new_device"
-            android:text="Add new vehicle"
+            android:text="@string/add_new_vehicle"
             android:textSize="32sp"
             android:textColor="@color/white"
             android:textStyle="bold"
@@ -40,6 +40,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:id="@+id/title_descr_list_layout"
         android:layout_below="@id/title_bar_layout"
         android:layout_marginVertical="20dp"
         android:layout_marginTop="19dp"
@@ -53,7 +54,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginVertical="4dp"
-            android:hint="Device Name..."
+            android:hint="@string/device_name_filler"
             android:padding="10dp"
             android:textColor="@color/black"
             android:textSize="20sp"
@@ -65,7 +66,7 @@
             android:layout_height="wrap_content"
             android:layout_marginVertical="4dp"
             android:gravity="top"
-            android:hint="Description"
+            android:hint="@string/description"
             android:minLines="2"
             android:padding="10dp"
             android:textColor="@color/black"
@@ -88,8 +89,111 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:choiceMode="multipleChoice"
+            android:minHeight="150dp"
             android:visibility="visible" />
     </LinearLayout>
+
+<!--    <ScrollView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_below="@id/title_descr_list_layout"-->
+<!--        android:id="@+id/scrollable_graph_content"-->
+<!--        android:layout_marginVertical="20dp"-->
+<!--        android:layout_marginTop="19dp"-->
+<!--        android:background="@drawable/rounded_corners"-->
+<!--        android:backgroundTint="@color/white"-->
+<!--        android:orientation="vertical"-->
+<!--        android:padding="15dp">-->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/scrollable_graph_content"
+        android:layout_below="@id/title_descr_list_layout"
+        android:background="@drawable/rounded_corners"
+        android:backgroundTint="@color/white"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/general_text"
+            android:text="Device information"
+            android:gravity="center"
+            android:textSize="25sp"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:paddingBottom="5dp"
+            />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/modulation"
+            android:text="Sensors modulation"
+            android:gravity="left"
+            android:padding="5dp"
+            android:textSize="20sp"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            />
+
+        <TextView
+            android:id="@+id/sensor_list_modulations"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:padding="5dp"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:layout_marginLeft="10dp"
+            android:visibility="visible" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/protocol"
+            android:text="Sensors protocol"
+            android:gravity="left"
+            android:padding="5dp"
+            android:textSize="20sp"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            />
+        <TextView
+            android:id="@+id/sensor_list_protocol"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:padding="5dp"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:layout_marginLeft="10dp"
+            android:visibility="visible" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/temperature_text"
+            android:text="Temperature Plot"
+            android:gravity="center"
+            android:textSize="15sp"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:paddingBottom="5dp"
+            />
+        <com.androidplot.xy.XYPlot
+            style="@style/APDefacto.Dark"
+            android:id="@+id/plot_temperature"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="400dp"
+            app:rangeTitle = "Temperature"
+            />
+
+
+    </LinearLayout>
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/delete_device_btn"

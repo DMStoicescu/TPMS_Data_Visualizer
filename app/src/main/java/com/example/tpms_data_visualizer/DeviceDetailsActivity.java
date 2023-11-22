@@ -3,15 +3,23 @@ package com.example.tpms_data_visualizer;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.androidplot.xy.LineAndPointFormatter;
+import com.androidplot.xy.PanZoom;
+import com.androidplot.xy.SimpleXYSeries;
+import com.androidplot.xy.XYGraphWidget;
+import com.androidplot.xy.XYPlot;
+import com.androidplot.xy.XYSeries;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -21,16 +29,20 @@ import com.google.firebase.firestore.DocumentReference;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.text.FieldPosition;
+import java.text.Format;
+import java.text.ParsePosition;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Arrays;
+import java.util.Collections;
 
 public class DeviceDetailsActivity extends AppCompatActivity {
 
+    //General variables
     EditText titleDeviceText, descriptionDeviceText;
-    //TODO add the content
     ImageButton saveDeviceButton;
     FloatingActionButton deleteDeviceButton;
-    TextView titleDeviceTextView, sensorListTitle;
+    TextView titleDeviceTextView, sensorListTitle, sensorListModulation, sensorListProtocol;
     String title,content,docId;
     boolean isViewMode = false;
 
@@ -38,10 +50,16 @@ public class DeviceDetailsActivity extends AppCompatActivity {
     Connection connectToDb = null;
     String[] testArray = {"Sensor1","Sensor2","Sensor3","Sensor4","Sensor5","Sensor6"};
     ArrayList <String> receivedSensorsId = new ArrayList<String>();
-    ListView sensorListView;
+    String receivedSensorsModulation = "";
+    String receivedSensorsProtocol = "";
+    ListView sensorListOptionsView;
     ArrayAdapter<String> listAdapter;
 
     ArrayList<String> checkedSensors;
+
+    //Plot related variables
+    LinearLayout scrollable_graph_content;
+    XYPlot temperature_plot;
 
 
     @Override
@@ -55,7 +73,11 @@ public class DeviceDetailsActivity extends AppCompatActivity {
         titleDeviceTextView = findViewById(R.id.new_device);
         deleteDeviceButton = findViewById(R.id.delete_device_btn);
         sensorListTitle = findViewById(R.id.sensor_list_title);
-        sensorListView = findViewById(R.id.sensor_list_options);
+        sensorListOptionsView = findViewById(R.id.sensor_list_options);
+        scrollable_graph_content = findViewById(R.id.scrollable_graph_content);
+        sensorListModulation = findViewById(R.id.sensor_list_modulations);
+        sensorListProtocol = findViewById(R.id.sensor_list_protocol);
+        temperature_plot = findViewById(R.id.plot_temperature);
 
 
 
@@ -75,16 +97,59 @@ public class DeviceDetailsActivity extends AppCompatActivity {
             titleDeviceTextView.setText("Device: " + title);
             deleteDeviceButton.setVisibility(View.VISIBLE);
             sensorListTitle.setVisibility(View.GONE);
-            sensorListView.setVisibility(View.GONE);
+            sensorListOptionsView.setVisibility(View.GONE);
 
             //Retrieve sensor data
             checkedSensors = getIntent().getStringArrayListExtra("checkedSensorsArray");
 
+            //Sort sensors ID so data is consistent
+            Collections.sort(checkedSensors);
+
+            //Get modulation and update its corresponding ListView
+            getModulationData(checkedSensors);
+            sensorListModulation.setText(receivedSensorsModulation);
+
+            //Get protocol and update its corresponding ListView
+            getProtocolData(checkedSensors);
+            sensorListProtocol.setText(receivedSensorsProtocol);
+
+
+
+            //Populate temperature graph
+            //So far this is dummy data:
+            final Number[] domainLabels = {1,2,3,6,7,8,9,10,13,14};
+            Number[] series1Numbers = {1,4,2,8,88,16,8,32,16,64};
+
+            // Turn the above arrays into XYSeries
+            XYSeries series1 = new SimpleXYSeries(Arrays.asList(series1Numbers),
+                    SimpleXYSeries.ArrayFormat.Y_VALS_ONLY,"Series 1");
+
+            LineAndPointFormatter series1Format = new LineAndPointFormatter(Color.RED,Color.GREEN,null,null);
+
+
+            temperature_plot.addSeries(series1,series1Format);
+
+            temperature_plot.getGraph().getLineLabelStyle(XYGraphWidget.Edge.BOTTOM).setFormat(new Format() {
+                @Override
+                public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
+                    int i = Math.round( ((Number)obj).floatValue() );
+                    return toAppendTo.append(domainLabels[i]);
+                }
+
+                @Override
+                public Object parseObject(String source, ParsePosition pos) {
+                    return null;
+                }
+            });
+
+            PanZoom.attach(temperature_plot);
 
         }
 
         //Logic if we are in create mode
         else {
+            scrollable_graph_content.setVisibility(View.GONE);
+
             //Logic for database query to retrieve unique sensor id:
             try {
                 //Connect to database and query it for unique sensor id
@@ -112,9 +177,11 @@ public class DeviceDetailsActivity extends AppCompatActivity {
             }
 
             //Update the sensorListView with the right ListAdapter
-            sensorListView.setAdapter(listAdapter);
+            sensorListOptionsView.setAdapter(listAdapter);
 
         }
+
+
         //Buttons logic
         saveDeviceButton.setOnClickListener((v -> saveDevice()));
         deleteDeviceButton.setOnClickListener((v -> deleteDeviceFromFirebase()));
@@ -141,9 +208,9 @@ public class DeviceDetailsActivity extends AppCompatActivity {
 
         if(!isViewMode) {
             checkedSensors = new ArrayList<>();
-            for (int i = 0; i < sensorListView.getCount(); i++) {
-                if (sensorListView.isItemChecked(i)) {
-                    checkedSensors.add(sensorListView.getItemAtPosition(i).toString());
+            for (int i = 0; i < sensorListOptionsView.getCount(); i++) {
+                if (sensorListOptionsView.isItemChecked(i)) {
+                    checkedSensors.add(sensorListOptionsView.getItemAtPosition(i).toString());
                 }
             }
         }
@@ -197,5 +264,74 @@ public class DeviceDetailsActivity extends AppCompatActivity {
                 }
             });
         }
+
+
+    void getModulationData(ArrayList<String> checkedSensors){
+        //Logic for database query to retrieve modulation for each sensor id configured in the vehicle:
+
+        try {
+            //Connect to database and query it for modulations for all sensors in the vehicle
+            ConnectionHelper connectionHelper = new ConnectionHelper();
+            connectToDb = connectionHelper.getConnection();
+
+            String dbGetSensorsModulationQuery = "SELECT modulation FROM TPMSData WHERE id IN " + "(";
+            for (int i = 0;  i<checkedSensors.size(); i++){
+                Log.e("ERROR", checkedSensors.get(i));
+                if(i==checkedSensors.size()-1){
+                    dbGetSensorsModulationQuery += "'" + checkedSensors.get(i) + "'" +") ";
+                }
+                else {
+                    dbGetSensorsModulationQuery += "'" + checkedSensors.get(i) + "'" +",";
+                }
+            }
+            dbGetSensorsModulationQuery += " GROUP BY id";
+
+            Statement st = connectToDb.createStatement();
+            ResultSet resSet = st.executeQuery(dbGetSensorsModulationQuery);
+            //Append the sensors to the sensorID list
+            int idx = 0;
+            while(resSet.next()){
+                receivedSensorsModulation  += checkedSensors.get(idx) +" - " + resSet.getString(1) + "\n";
+                idx++;
+            }
+        }
+        catch (Exception ex){
+            Utility.showToast(DeviceDetailsActivity.this, "Could not retrieve modulation data, check internet connection");
+        }
+    }
+
+    void getProtocolData(ArrayList<String> checkedSensors){
+        //Logic for database query to retrieve protocol for each sensor id configured in the vehicle:
+
+        try {
+            //Connect to database and query it for protocols for all sensors in the vehicle
+            ConnectionHelper connectionHelper = new ConnectionHelper();
+            connectToDb = connectionHelper.getConnection();
+
+            String dbGetSensorProtocolQuery = "SELECT protocol FROM TPMSData WHERE id IN " + "(";
+            for (int i = 0;  i<checkedSensors.size(); i++){
+                Log.e("ERROR", checkedSensors.get(i));
+                if(i==checkedSensors.size()-1){
+                    dbGetSensorProtocolQuery += "'" + checkedSensors.get(i) + "'" +") ";
+                }
+                else {
+                    dbGetSensorProtocolQuery += "'" + checkedSensors.get(i) + "'" +",";
+                }
+            }
+            dbGetSensorProtocolQuery += " GROUP BY id";
+
+            Statement st = connectToDb.createStatement();
+            ResultSet resSet = st.executeQuery(dbGetSensorProtocolQuery);
+            //Append the sensors to the sensorID list
+            int idx = 0;
+            while(resSet.next()){
+                receivedSensorsProtocol += checkedSensors.get(idx) +" - " + resSet.getString(1) + "\n";
+                idx++;
+            }
+        }
+        catch (Exception ex){
+            Utility.showToast(DeviceDetailsActivity.this, "Could not retrieve protocol data, check internet connection");
+        }
+    }
 
 }
