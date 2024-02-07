@@ -33,8 +33,6 @@
             app:tint="@color/white"
             android:background="?attr/selectableItemBackgroundBorderless"/>
 
-
-
     </RelativeLayout>
 
     <LinearLayout
@@ -93,106 +91,134 @@
             android:visibility="visible" />
     </LinearLayout>
 
-<!--    <ScrollView-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_below="@id/title_descr_list_layout"-->
-<!--        android:id="@+id/scrollable_graph_content"-->
-<!--        android:layout_marginVertical="20dp"-->
-<!--        android:layout_marginTop="19dp"-->
-<!--        android:background="@drawable/rounded_corners"-->
-<!--        android:backgroundTint="@color/white"-->
-<!--        android:orientation="vertical"-->
-<!--        android:padding="15dp">-->
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/scrollable_graph_content"
         android:layout_below="@id/title_descr_list_layout"
         android:background="@drawable/rounded_corners"
-        android:backgroundTint="@color/white"
-        android:orientation="vertical">
+        android:layout_marginBottom="60dp">
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/general_text"
-            android:text="Device information"
-            android:gravity="center"
-            android:textSize="25sp"
-            android:textColor="@color/black"
-            android:textStyle="bold"
-            android:paddingBottom="5dp"
-            />
+            android:id="@+id/scrollable_information_content"
+            android:layout_below="@id/title_descr_list_layout"
+            android:background="@drawable/rounded_corners"
+            android:backgroundTint="@color/white"
+            android:orientation="vertical">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/modulation"
-            android:text="Sensors modulation"
-            android:gravity="left"
-            android:padding="5dp"
-            android:textSize="20sp"
-            android:textColor="@color/black"
-            android:textStyle="bold"
-            />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/general_text"
+                android:text="Vehicle information"
+                android:gravity="center"
+                android:background="@drawable/bottom_border"
+                android:textSize="25sp"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                android:paddingBottom="5dp"
+                />
 
-        <TextView
-            android:id="@+id/sensor_list_modulations"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:padding="5dp"
-            android:textColor="@color/black"
-            android:textStyle="bold"
-            android:layout_marginLeft="10dp"
-            android:visibility="visible" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/modulation"
+                android:text="Sensors modulation"
+                android:gravity="left"
+                android:padding="5dp"
+                android:textSize="20sp"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/protocol"
-            android:text="Sensors protocol"
-            android:gravity="left"
-            android:padding="5dp"
-            android:textSize="20sp"
-            android:textColor="@color/black"
-            android:textStyle="bold"
-            />
-        <TextView
-            android:id="@+id/sensor_list_protocol"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:padding="5dp"
-            android:textColor="@color/black"
-            android:textStyle="bold"
-            android:layout_marginLeft="10dp"
-            android:visibility="visible" />
+            <TextView
+                android:id="@+id/sensor_list_modulations"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:padding="5dp"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                android:layout_marginLeft="10dp"
+                android:visibility="visible" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/temperature_text"
-            android:text="Temperature Plot"
-            android:gravity="center"
-            android:textSize="15sp"
-            android:textColor="@color/black"
-            android:textStyle="bold"
-            android:paddingBottom="5dp"
-            />
-        <com.androidplot.xy.XYPlot
-            style="@style/APDefacto.Dark"
-            android:id="@+id/plot_temperature"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="400dp"
-            app:rangeTitle = "Temperature"
-            />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/protocol"
+                android:background="@drawable/top_border"
+                android:text="Sensors protocol"
+                android:gravity="left"
+                android:padding="5dp"
+                android:textSize="20sp"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                />
+            <TextView
+                android:id="@+id/sensor_list_protocol"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:padding="5dp"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                android:layout_marginLeft="10dp"
+                android:visibility="visible" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/top_border"
+                android:id="@+id/last_seen"
+                android:text="Last time active"
+                android:gravity="left"
+                android:padding="5dp"
+                android:textSize="20sp"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                />
+            <TextView
+                android:id="@+id/vehicle_last_seen"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:padding="5dp"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                android:layout_marginLeft="10dp"
+                android:visibility="visible" />
 
 
-    </LinearLayout>
+    <!--        Buttons for further operations and graphs-->
+            <Button
+                android:id="@+id/pressure_graph_btn"
+                android:backgroundTint="@color/white"
+                android:background="@drawable/top_border"
+                android:textColor="@color/black"
+                android:layout_width="fill_parent"
+                android:layout_height="55dp"
+                android:text="Pressure Graph"
+                android:drawableRight="@drawable/baseline_chevron_right_24"
+                android:drawableLeft="@drawable/pressure_icon"
+                android:textSize="25sp"/>
+
+            <Button
+                android:id="@+id/temperature_graph_btn"
+                android:backgroundTint="@color/white"
+                android:background="@drawable/top_border"
+                android:textColor="@color/black"
+                android:layout_width="fill_parent"
+                android:layout_height="55dp"
+                android:text="Temperature Graph"
+                android:drawableRight="@drawable/baseline_chevron_right_24"
+                android:drawableLeft="@drawable/temperature_icon"
+                android:textSize="25sp"/>
+
+
+        </LinearLayout>
+    </ScrollView>
 
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

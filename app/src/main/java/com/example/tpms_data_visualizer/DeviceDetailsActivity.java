@@ -3,11 +3,13 @@ package com.example.tpms_data_visualizer;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -42,7 +44,8 @@ public class DeviceDetailsActivity extends AppCompatActivity {
     EditText titleDeviceText, descriptionDeviceText;
     ImageButton saveDeviceButton;
     FloatingActionButton deleteDeviceButton;
-    TextView titleDeviceTextView, sensorListTitle, sensorListModulation, sensorListProtocol;
+    Button pressureGraphButton, temperatureGraphButton;
+    TextView titleDeviceTextView, sensorListTitle, sensorListModulation, sensorListProtocol, vehicleLastSeen;
     String title,content,docId;
     boolean isViewMode = false;
 
@@ -52,13 +55,14 @@ public class DeviceDetailsActivity extends AppCompatActivity {
     ArrayList <String> receivedSensorsId = new ArrayList<String>();
     String receivedSensorsModulation = "";
     String receivedSensorsProtocol = "";
+    String receivedLastSeenTime = "";
     ListView sensorListOptionsView;
     ArrayAdapter<String> listAdapter;
 
     ArrayList<String> checkedSensors;
 
     //Plot related variables
-    LinearLayout scrollable_graph_content;
+    LinearLayout scrollableInfoLayout, temperatureContentLayout, pressureContentLayout;
     XYPlot temperature_plot;
 
 
@@ -72,20 +76,22 @@ public class DeviceDetailsActivity extends AppCompatActivity {
         saveDeviceButton = findViewById(R.id.save_device_btn);
         titleDeviceTextView = findViewById(R.id.new_device);
         deleteDeviceButton = findViewById(R.id.delete_device_btn);
+        pressureGraphButton = findViewById(R.id.pressure_graph_btn);
+        temperatureGraphButton = findViewById(R.id.temperature_graph_btn);
         sensorListTitle = findViewById(R.id.sensor_list_title);
         sensorListOptionsView = findViewById(R.id.sensor_list_options);
-        scrollable_graph_content = findViewById(R.id.scrollable_graph_content);
+        scrollableInfoLayout = findViewById(R.id.scrollable_information_content);
         sensorListModulation = findViewById(R.id.sensor_list_modulations);
         sensorListProtocol = findViewById(R.id.sensor_list_protocol);
-        temperature_plot = findViewById(R.id.plot_temperature);
-
-
+        vehicleLastSeen = findViewById(R.id.vehicle_last_seen);
+//        temperature_plot = findViewById(R.id.plot_temperature);
 
         //Receive data logic
         title = getIntent().getStringExtra("title");
         content = getIntent().getStringExtra("content");
         docId = getIntent().getStringExtra("docId");
 
+        //Setter for view mode
         if(docId != null && !docId.isEmpty()){
             isViewMode = true;
         }
@@ -93,8 +99,9 @@ public class DeviceDetailsActivity extends AppCompatActivity {
         titleDeviceText.setText(title);
         descriptionDeviceText.setText(content);
 
+        //View mode enabled logic
         if(isViewMode){
-            titleDeviceTextView.setText("Device: " + title);
+            titleDeviceTextView.setText("Vehicle: " + title);
             deleteDeviceButton.setVisibility(View.VISIBLE);
             sensorListTitle.setVisibility(View.GONE);
             sensorListOptionsView.setVisibility(View.GONE);
@@ -113,42 +120,46 @@ public class DeviceDetailsActivity extends AppCompatActivity {
             getProtocolData(checkedSensors);
             sensorListProtocol.setText(receivedSensorsProtocol);
 
+            //Get last seen time and update its corresponding TextView
+            getLastSeenTime(checkedSensors);
+            vehicleLastSeen.setText(receivedLastSeenTime);
 
+            //TODO move the following in graph activity
 
-            //Populate temperature graph
-            //So far this is dummy data:
-            final Number[] domainLabels = {1,2,3,6,7,8,9,10,13,14};
-            Number[] series1Numbers = {1,4,2,8,88,16,8,32,16,64};
-
-            // Turn the above arrays into XYSeries
-            XYSeries series1 = new SimpleXYSeries(Arrays.asList(series1Numbers),
-                    SimpleXYSeries.ArrayFormat.Y_VALS_ONLY,"Series 1");
-
-            LineAndPointFormatter series1Format = new LineAndPointFormatter(Color.RED,Color.GREEN,null,null);
-
-
-            temperature_plot.addSeries(series1,series1Format);
-
-            temperature_plot.getGraph().getLineLabelStyle(XYGraphWidget.Edge.BOTTOM).setFormat(new Format() {
-                @Override
-                public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
-                    int i = Math.round( ((Number)obj).floatValue() );
-                    return toAppendTo.append(domainLabels[i]);
-                }
-
-                @Override
-                public Object parseObject(String source, ParsePosition pos) {
-                    return null;
-                }
-            });
-
-            PanZoom.attach(temperature_plot);
+//            //Populate temperature graph
+//            //So far this is dummy data:
+//            final Number[] domainLabels = {1,2,3,6,7,8,9,10,13,14};
+//            Number[] series1Numbers = {1,4,2,8,88,16,8,32,16,64};
+//
+//            // Turn the above arrays into XYSeries
+//            XYSeries series1 = new SimpleXYSeries(Arrays.asList(series1Numbers),
+//                    SimpleXYSeries.ArrayFormat.Y_VALS_ONLY,"Series 1");
+//
+//            LineAndPointFormatter series1Format = new LineAndPointFormatter(Color.RED,Color.GREEN,null,null);
+//
+//
+//            temperature_plot.addSeries(series1,series1Format);
+//
+//            temperature_plot.getGraph().getLineLabelStyle(XYGraphWidget.Edge.BOTTOM).setFormat(new Format() {
+//                @Override
+//                public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
+//                    int i = Math.round( ((Number)obj).floatValue() );
+//                    return toAppendTo.append(domainLabels[i]);
+//                }
+//
+//                @Override
+//                public Object parseObject(String source, ParsePosition pos) {
+//                    return null;
+//                }
+//            });
+//
+//            PanZoom.attach(temperature_plot);
 
         }
 
-        //Logic if we are in create mode
+        //Create mode enabled logic
         else {
-            scrollable_graph_content.setVisibility(View.GONE);
+            scrollableInfoLayout.setVisibility(View.GONE);
 
             //Logic for database query to retrieve unique sensor id:
             try {
@@ -181,24 +192,21 @@ public class DeviceDetailsActivity extends AppCompatActivity {
 
         }
 
-
         //Buttons logic
         saveDeviceButton.setOnClickListener((v -> saveDevice()));
+        pressureGraphButton.setOnClickListener((v) -> startActivity(new Intent(DeviceDetailsActivity.this, GraphActivity.class)));
+        temperatureGraphButton.setOnClickListener((v) -> startActivity(new Intent(DeviceDetailsActivity.this, GraphActivity.class)));
         deleteDeviceButton.setOnClickListener((v -> deleteDeviceFromFirebase()));
     }
 
     void saveDevice(){
         String device_title = titleDeviceText.getText().toString();
         String device_description = descriptionDeviceText.getText().toString();
-        //TODO add the content here
 
         if (device_title == null || device_title.isEmpty()){
             titleDeviceText.setError(("Title is required!"));
             return;
         }
-
-        //TODO: Once sensors are added, do validation
-
 
         Device device = new Device();
 
@@ -208,10 +216,18 @@ public class DeviceDetailsActivity extends AppCompatActivity {
 
         if(!isViewMode) {
             checkedSensors = new ArrayList<>();
+            int sensor_counter = 0;
+
             for (int i = 0; i < sensorListOptionsView.getCount(); i++) {
                 if (sensorListOptionsView.isItemChecked(i)) {
+                    sensor_counter += 1;
                     checkedSensors.add(sensorListOptionsView.getItemAtPosition(i).toString());
                 }
+            }
+
+            if(sensor_counter < 2 || sensor_counter > 6){
+                titleDeviceText.setError("Number of selected sensors must be between 2 and 6!");
+                return;
             }
         }
 
@@ -274,9 +290,9 @@ public class DeviceDetailsActivity extends AppCompatActivity {
             ConnectionHelper connectionHelper = new ConnectionHelper();
             connectToDb = connectionHelper.getConnection();
 
+            //Create the query
             String dbGetSensorsModulationQuery = "SELECT modulation FROM TPMSData WHERE id IN " + "(";
             for (int i = 0;  i<checkedSensors.size(); i++){
-                Log.e("ERROR", checkedSensors.get(i));
                 if(i==checkedSensors.size()-1){
                     dbGetSensorsModulationQuery += "'" + checkedSensors.get(i) + "'" +") ";
                 }
@@ -308,9 +324,9 @@ public class DeviceDetailsActivity extends AppCompatActivity {
             ConnectionHelper connectionHelper = new ConnectionHelper();
             connectToDb = connectionHelper.getConnection();
 
+            //Create the query
             String dbGetSensorProtocolQuery = "SELECT protocol FROM TPMSData WHERE id IN " + "(";
             for (int i = 0;  i<checkedSensors.size(); i++){
-                Log.e("ERROR", checkedSensors.get(i));
                 if(i==checkedSensors.size()-1){
                     dbGetSensorProtocolQuery += "'" + checkedSensors.get(i) + "'" +") ";
                 }
@@ -331,6 +347,37 @@ public class DeviceDetailsActivity extends AppCompatActivity {
         }
         catch (Exception ex){
             Utility.showToast(DeviceDetailsActivity.this, "Could not retrieve protocol data, check internet connection");
+        }
+    }
+
+    void getLastSeenTime(ArrayList<String> checkedSensors){
+        try {
+            //Connect to database and query it for protocols for all sensors in the vehicle
+            ConnectionHelper connectionHelper = new ConnectionHelper();
+            connectToDb = connectionHelper.getConnection();
+
+            //Create the query
+            String dbGetSensorProtocolQuery = "SELECT MAX(time) FROM TPMSData WHERE id IN " + "(";
+            for (int i = 0;  i<checkedSensors.size(); i++){
+                if(i==checkedSensors.size()-1){
+                    dbGetSensorProtocolQuery += "'" + checkedSensors.get(i) + "'" +") ";
+                }
+                else {
+                    dbGetSensorProtocolQuery += "'" + checkedSensors.get(i) + "'" +",";
+                }
+            }
+
+            Statement st = connectToDb.createStatement();
+            ResultSet resSet = st.executeQuery(dbGetSensorProtocolQuery);
+
+            //Add last seen time to corresponding variable
+            while(resSet.next()){
+                receivedLastSeenTime += resSet.getString(1) + "\n";
+            }
+
+        }
+        catch (Exception ex){
+            Utility.showToast(DeviceDetailsActivity.this, "Could not retrieve last seen data, check internet connection");
         }
     }
 

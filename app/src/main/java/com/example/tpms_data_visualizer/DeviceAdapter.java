@@ -3,7 +3,6 @@ package com.example.tpms_data_visualizer;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,14 +48,12 @@ public class DeviceAdapter extends FirestoreRecyclerAdapter<Device, DeviceAdapte
     class DeviceViewHolder extends RecyclerView.ViewHolder {
 
         TextView titleTextView, descriptionTextView, timeStampTextView;
-        //TODO ADD LIST OF SENSORS
         public DeviceViewHolder(@NonNull View itemView) {
             super(itemView);
 
             titleTextView = itemView.findViewById(R.id.recycle_device_title);
             descriptionTextView = itemView.findViewById(R.id.recycle_device_description);
             timeStampTextView = itemView.findViewById(R.id.recycle_device_timestamp);
-            //TODO ADD LIST OF SENSORS
         }
     }
 
