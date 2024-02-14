@@ -15,11 +15,14 @@ import com.androidplot.xy.XYSeries;
 import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class GraphActivity extends AppCompatActivity {
 
     XYPlot temperaturePlot;
+    String title,content,docId;
+    ArrayList<String> checkedSensors;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +30,11 @@ public class GraphActivity extends AppCompatActivity {
         setContentView(R.layout.activity_graph);
 
         temperaturePlot = findViewById(R.id.temperature_plot);
+
+        title = getIntent().getStringExtra("title");
+        content = getIntent().getStringExtra("content");
+        docId = getIntent().getStringExtra("docId");
+        checkedSensors = getIntent().getStringArrayListExtra("checkedSensorsArray");
 
 
         //Populate temperature graph
@@ -38,7 +46,7 @@ public class GraphActivity extends AppCompatActivity {
         XYSeries series1 = new SimpleXYSeries(Arrays.asList(series1Numbers),
                 SimpleXYSeries.ArrayFormat.Y_VALS_ONLY,"Series 1");
 
-        LineAndPointFormatter series1Format = new LineAndPointFormatter(Color.RED,Color.GREEN,null,null);
+        LineAndPointFormatter series1Format = new LineAndPointFormatter(Color.GRAY,Color.RED,null,null);
 
 
         temperaturePlot.addSeries(series1,series1Format);

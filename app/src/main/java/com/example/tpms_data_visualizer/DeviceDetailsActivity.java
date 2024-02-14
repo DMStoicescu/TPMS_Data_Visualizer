@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -65,6 +66,18 @@ public class DeviceDetailsActivity extends AppCompatActivity {
     LinearLayout scrollableInfoLayout, temperatureContentLayout, pressureContentLayout;
     XYPlot temperature_plot;
 
+    Handler handler = new Handler();
+     Runnable updateTask = new Runnable() {
+        @Override
+        public void run() {
+            // Your existing code to update data
+            getProtocolData(checkedSensors);
+            sensorListProtocol.setText(receivedSensorsProtocol);
+            // Schedule this runnable again in 60000 milliseconds (1 minute)
+            handler.postDelayed(this, 60000);
+        }
+     };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +97,6 @@ public class DeviceDetailsActivity extends AppCompatActivity {
         sensorListModulation = findViewById(R.id.sensor_list_modulations);
         sensorListProtocol = findViewById(R.id.sensor_list_protocol);
         vehicleLastSeen = findViewById(R.id.vehicle_last_seen);
-//        temperature_plot = findViewById(R.id.plot_temperature);
 
         //Receive data logic
         title = getIntent().getStringExtra("title");
@@ -121,42 +133,13 @@ public class DeviceDetailsActivity extends AppCompatActivity {
             sensorListProtocol.setText(receivedSensorsProtocol);
 
             //Get last seen time and update its corresponding TextView
+            //TODO add scheduler so that it repeats after some time
+            handler.postDelayed(updateTask, 60000);
+
             getLastSeenTime(checkedSensors);
             vehicleLastSeen.setText(receivedLastSeenTime);
 
-            //TODO move the following in graph activity
-
-//            //Populate temperature graph
-//            //So far this is dummy data:
-//            final Number[] domainLabels = {1,2,3,6,7,8,9,10,13,14};
-//            Number[] series1Numbers = {1,4,2,8,88,16,8,32,16,64};
-//
-//            // Turn the above arrays into XYSeries
-//            XYSeries series1 = new SimpleXYSeries(Arrays.asList(series1Numbers),
-//                    SimpleXYSeries.ArrayFormat.Y_VALS_ONLY,"Series 1");
-//
-//            LineAndPointFormatter series1Format = new LineAndPointFormatter(Color.RED,Color.GREEN,null,null);
-//
-//
-//            temperature_plot.addSeries(series1,series1Format);
-//
-//            temperature_plot.getGraph().getLineLabelStyle(XYGraphWidget.Edge.BOTTOM).setFormat(new Format() {
-//                @Override
-//                public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
-//                    int i = Math.round( ((Number)obj).floatValue() );
-//                    return toAppendTo.append(domainLabels[i]);
-//                }
-//
-//                @Override
-//                public Object parseObject(String source, ParsePosition pos) {
-//                    return null;
-//                }
-//            });
-//
-//            PanZoom.attach(temperature_plot);
-
         }
-
         //Create mode enabled logic
         else {
             scrollableInfoLayout.setVisibility(View.GONE);
@@ -192,11 +175,18 @@ public class DeviceDetailsActivity extends AppCompatActivity {
 
         }
 
-        //Buttons logic
+        //Buttons function calls
         saveDeviceButton.setOnClickListener((v -> saveDevice()));
         pressureGraphButton.setOnClickListener((v) -> startActivity(new Intent(DeviceDetailsActivity.this, GraphActivity.class)));
         temperatureGraphButton.setOnClickListener((v) -> startActivity(new Intent(DeviceDetailsActivity.this, GraphActivity.class)));
         deleteDeviceButton.setOnClickListener((v -> deleteDeviceFromFirebase()));
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Remove callbacks to avoid memory leaks
+        handler.removeCallbacks(updateTask);
     }
 
     void saveDevice(){
