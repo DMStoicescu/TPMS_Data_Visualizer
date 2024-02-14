@@ -71,8 +71,8 @@ public class DeviceDetailsActivity extends AppCompatActivity {
         @Override
         public void run() {
             // Your existing code to update data
-            getProtocolData(checkedSensors);
-            sensorListProtocol.setText(receivedSensorsProtocol);
+            getLastSeenTime(checkedSensors);
+            vehicleLastSeen.setText(receivedLastSeenTime);
             // Schedule this runnable again in 60000 milliseconds (1 minute)
             handler.postDelayed(this, 60000);
         }
@@ -134,10 +134,7 @@ public class DeviceDetailsActivity extends AppCompatActivity {
 
             //Get last seen time and update its corresponding TextView
             //TODO add scheduler so that it repeats after some time
-            handler.postDelayed(updateTask, 60000);
-
-            getLastSeenTime(checkedSensors);
-            vehicleLastSeen.setText(receivedLastSeenTime);
+            handler.postDelayed(updateTask, 1);
 
         }
         //Create mode enabled logic
@@ -362,7 +359,7 @@ public class DeviceDetailsActivity extends AppCompatActivity {
 
             //Add last seen time to corresponding variable
             while(resSet.next()){
-                receivedLastSeenTime += resSet.getString(1) + "\n";
+                receivedLastSeenTime = resSet.getString(1) + "\n";
             }
 
         }
