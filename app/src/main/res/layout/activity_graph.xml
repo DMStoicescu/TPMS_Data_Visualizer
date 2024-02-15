@@ -20,15 +20,21 @@
         android:paddingBottom="5dp"
         />
 
+
     <com.androidplot.xy.XYPlot
         style="@style/APDefacto.Dark"
         android:layout_below="@id/temperature_text"
-        android:id="@+id/temperature_plot"
+        android:id="@+id/temperature_plot_1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="400dp"
         app:rangeTitle = "Temperature"
+        android:visibility="gone"
+        androidplot.renderMode="use_background_thread"
         />
+
+
+
 
 
 </RelativeLayout>

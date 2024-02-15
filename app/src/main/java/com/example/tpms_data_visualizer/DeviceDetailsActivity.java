@@ -133,7 +133,6 @@ public class DeviceDetailsActivity extends AppCompatActivity {
             sensorListProtocol.setText(receivedSensorsProtocol);
 
             //Get last seen time and update its corresponding TextView
-            //TODO add scheduler so that it repeats after some time
             handler.postDelayed(updateTask, 1);
 
         }
@@ -174,8 +173,8 @@ public class DeviceDetailsActivity extends AppCompatActivity {
 
         //Buttons function calls
         saveDeviceButton.setOnClickListener((v -> saveDevice()));
-        pressureGraphButton.setOnClickListener((v) -> startActivity(new Intent(DeviceDetailsActivity.this, GraphActivity.class)));
-        temperatureGraphButton.setOnClickListener((v) -> startActivity(new Intent(DeviceDetailsActivity.this, GraphActivity.class)));
+        pressureGraphButton.setOnClickListener((v) -> pressureGraphOnClick());
+        temperatureGraphButton.setOnClickListener((v) -> temperatureGraphOnClick());
         deleteDeviceButton.setOnClickListener((v -> deleteDeviceFromFirebase()));
     }
 
@@ -268,7 +267,23 @@ public class DeviceDetailsActivity extends AppCompatActivity {
             });
         }
 
+    void pressureGraphOnClick(){
+        Intent intent = new Intent(DeviceDetailsActivity.this, GraphActivity.class);
+        intent.putExtra("title", title);
+        intent.putExtra("content", content);
+        intent.putStringArrayListExtra("checkedSensors", checkedSensors);
+        intent.putExtra("docId", docId);
+        startActivity(intent);
+    }
 
+    void temperatureGraphOnClick(){
+        Intent intent = new Intent(DeviceDetailsActivity.this, GraphActivity.class);
+        intent.putExtra("title", title);
+        intent.putExtra("content", content);
+        intent.putStringArrayListExtra("checkedSensors", checkedSensors);
+        intent.putExtra("docId", docId);
+        startActivity(intent);
+    }
     void getModulationData(ArrayList<String> checkedSensors){
         //Logic for database query to retrieve modulation for each sensor id configured in the vehicle:
 
@@ -297,6 +312,8 @@ public class DeviceDetailsActivity extends AppCompatActivity {
                 receivedSensorsModulation  += checkedSensors.get(idx) +" - " + resSet.getString(1) + "\n";
                 idx++;
             }
+            connectToDb.close();
+
         }
         catch (Exception ex){
             Utility.showToast(DeviceDetailsActivity.this, "Could not retrieve modulation data, check internet connection");
@@ -331,6 +348,8 @@ public class DeviceDetailsActivity extends AppCompatActivity {
                 receivedSensorsProtocol += checkedSensors.get(idx) +" - " + resSet.getString(1) + "\n";
                 idx++;
             }
+
+            connectToDb.close();
         }
         catch (Exception ex){
             Utility.showToast(DeviceDetailsActivity.this, "Could not retrieve protocol data, check internet connection");
@@ -362,6 +381,7 @@ public class DeviceDetailsActivity extends AppCompatActivity {
                 receivedLastSeenTime = resSet.getString(1) + "\n";
             }
 
+            connectToDb.close();
         }
         catch (Exception ex){
             Utility.showToast(DeviceDetailsActivity.this, "Could not retrieve last seen data, check internet connection");
