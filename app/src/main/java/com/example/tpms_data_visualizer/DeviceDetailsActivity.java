@@ -273,6 +273,7 @@ public class DeviceDetailsActivity extends AppCompatActivity {
         intent.putExtra("content", content);
         intent.putStringArrayListExtra("checkedSensors", checkedSensors);
         intent.putExtra("docId", docId);
+        intent.putExtra("type", "pressure");
         startActivity(intent);
     }
 
@@ -282,6 +283,7 @@ public class DeviceDetailsActivity extends AppCompatActivity {
         intent.putExtra("content", content);
         intent.putStringArrayListExtra("checkedSensors", checkedSensors);
         intent.putExtra("docId", docId);
+        intent.putExtra("type", "temperature");
         startActivity(intent);
     }
     void getModulationData(ArrayList<String> checkedSensors){

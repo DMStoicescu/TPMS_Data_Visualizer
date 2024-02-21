@@ -5,8 +5,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import com.androidplot.xy.LineAndPointFormatter;
 import com.androidplot.xy.PanZoom;
@@ -21,120 +23,81 @@ import java.sql.Statement;
 import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Random;
 
 
 public class GraphActivity extends AppCompatActivity {
 
-    XYPlot temperaturePlot1,temperaturePlot2,temperaturePlot3,temperaturePlot4,temperaturePlot5,temperaturePlot6;
-    String title,content,docId;
+    XYPlot data_plot;
+    TextView titleTextView;
+    String title,content,docId, graph_type;
     ArrayList<String> checkedSensors;
     Connection connectToDb = null;
-    SensorHashMap temperature_map;
+    SensorHashMap data_map;
     HashMap<String, SensorHashMap> map;
+    ArrayList<ArrayList<Integer>> colours = new ArrayList<ArrayList<Integer>>();
+    Handler handler = new Handler();
+    Runnable updateGraph = new Runnable() {
+        @Override
+        public void run() {
+            // Your existing code to update data
+            plotGraphData();
+            data_plot.getGraph().setDomainGridLinePaint(null);
+            // Schedule this runnable again in 60000 milliseconds (1 minute)
+            handler.postDelayed(this, 60000);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_graph);
 
-        temperaturePlot1 = findViewById(R.id.temperature_plot_1);
-//        temperaturePlot2 = findViewById(R.id.temperature_plot_2);
-//        temperaturePlot3 = findViewById(R.id.temperature_plot_3);
-//        temperaturePlot4 = findViewById(R.id.temperature_plot_4);
-//        temperaturePlot5 = findViewById(R.id.temperature_plot_5);
-//        temperaturePlot6 = findViewById(R.id.temperature_plot_6);
-//
-//        ArrayList<XYPlot> plot_arr = new ArrayList<>();
-//        plot_arr.add(temperaturePlot1);
-//        plot_arr.add(temperaturePlot2);
-//        plot_arr.add(temperaturePlot3);
-//        plot_arr.add(temperaturePlot4);
-//        plot_arr.add(temperaturePlot5);
-//        plot_arr.add(temperaturePlot6);
-
+        titleTextView = findViewById(R.id.data_text);
+        data_plot = findViewById(R.id.data_plot);
 
 
         title = getIntent().getStringExtra("title");
         content = getIntent().getStringExtra("content");
         docId = getIntent().getStringExtra("docId");
         checkedSensors = getIntent().getStringArrayListExtra("checkedSensors");
+        graph_type = getIntent().getStringExtra("type");
 
-        getTemperatureData(checkedSensors);
-
-        int idx = -1;
-        for (String key: map.keySet()) {
-            idx ++;
-            Log.e("ERROR", "NUIELEEEE");
-            Log.e("ERROR", key);
-
-            temperaturePlot1.setVisibility(View.VISIBLE);
-
-            for (Float value: map.get(key).values) {
-                System.out.println(map);
-
-                Log.e("ERROR", key + " " + String.valueOf(value));
-            }
-
-            temperaturePlot1.addSeries(new SimpleXYSeries(map.get(key).values,
-                    SimpleXYSeries.ArrayFormat.Y_VALS_ONLY,key),new LineAndPointFormatter(generateNewColor(),generateNewColor(),null,null));
-
-            temperaturePlot1.getGraph().getLineLabelStyle(XYGraphWidget.Edge.BOTTOM).setFormat(new Format() {
-                @Override
-                public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
-                    int i = Math.round( ((Number)obj).floatValue());
-                    return toAppendTo.append(map.get(key).dates.get(i));
-                }
-
-                @Override
-                public Object parseObject(String source, ParsePosition pos) {
-                    return null;
-                }
-            });
-
-
+        if (graph_type.equals("pressure")) {
+            titleTextView.setText("Pressure Plot");
+            getPressureData(checkedSensors);
+        } else if (graph_type.equals("temperature")) {
+            titleTextView.setText("Temperature Plot");
+            getTemperatureData(checkedSensors);
+        } else {
+            Utility.showToast(GraphActivity.this, "Something went wrong in getting type of the graph");
+            finish();
         }
 
+        //Generate colors for consistency when refreshing
+        for (String key: map.keySet()) {
+            ArrayList<Integer> temp = new ArrayList<Integer>();
+            temp.add(generateNewColor());
+            temp.add(generateNewColor());
+            colours.add(temp);
+        }
 
-//        final Number[] domainLabels1 = {100,200,300,600,700,800,900,100,130,140};
-//        Number[] series1Numbers1 = {1,4,2,8,88,16,8,32,16,64};
-//
-//        Number[] series1Numbers2 = {10,40,20,80,880,160,80,320,160,640};
-//
-//        // Turn the above arrays into XYSeries
-//        XYSeries series1 = new SimpleXYSeries(Arrays.asList(series1Numbers1),
-//                SimpleXYSeries.ArrayFormat.Y_VALS_ONLY,"Series 1");
-//
-//        LineAndPointFormatter series1Format1 = new LineAndPointFormatter(Color.RED,Color.GREEN,null,null);
-//
-//        XYSeries series2 = new SimpleXYSeries(Arrays.asList(series1Numbers2),
-//                SimpleXYSeries.ArrayFormat.Y_VALS_ONLY,"Series 2");
-//
-//        LineAndPointFormatter series1Format2 = new LineAndPointFormatter(Color.WHITE,Color.BLUE,null,null);
-//
-//
-//        temperaturePlot.addSeries(series1,series1Format1);
-//        temperaturePlot.addSeries(series2,series1Format2);
+        handler.postDelayed(updateGraph, 1);
 
-//        temperaturePlot1.getGraph().getLineLabelStyle(XYGraphWidget.Edge.BOTTOM).setFormat(new Format() {
-//            @Override
-//            public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
-//                int i = Math.round( ((Number)obj).floatValue() );
-//                return toAppendTo.append(domainLabels1[i]);
-//            }
-//
-//            @Override
-//            public Object parseObject(String source, ParsePosition pos) {
-//                return null;
-//            }
-//        });
+    }
 
-        PanZoom.attach(temperaturePlot1);
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Remove callbacks to avoid memory leaks
+        handler.removeCallbacks(updateGraph);
     }
     public static int generateNewColor() {
         Random random = new Random();
@@ -158,7 +121,7 @@ public class GraphActivity extends AppCompatActivity {
 
             //Create the query
             for (int i = 0;  i<checkedSensors.size(); i++){
-                temperature_map = new SensorHashMap();
+                data_map = new SensorHashMap();
 
                 String dbGetSensorProtocolQuery = "SELECT DISTINCT time, temperature_C, id FROM TPMSData WHERE id ='"+ checkedSensors.get(i) +"'";
                 dbGetSensorProtocolQuery += " ORDER BY time ASC";
@@ -168,12 +131,12 @@ public class GraphActivity extends AppCompatActivity {
                 String id = "sample";
                 //Add last seen time to corresponding variable
                 while(resSet.next()){
-                    temperature_map.values.add(resSet.getFloat("temperature_C"));
-                    temperature_map.dates.add(resSet.getString("time"));
+                    data_map.values.add(resSet.getFloat("temperature_C"));
+                    data_map.dates.add(resSet.getString("time"));
                     id = resSet.getString("id");
                 }
 
-                this.map.put(id,temperature_map);
+                this.map.put(id,data_map);
             }
 
             connectToDb.close();
@@ -183,5 +146,85 @@ public class GraphActivity extends AppCompatActivity {
             Log.e("ERROR", String.valueOf(ex));
             Utility.showToast(GraphActivity.this, "Could not retrieve last seen data, check internet connection");
         }
+    }
+
+    void getPressureData(ArrayList<String> checkedSensors){
+        try {
+            //Redo maps
+            map = new HashMap<>();
+
+            //Connect to database and query it for protocols for all sensors in the vehicle
+            ConnectionHelper connectionHelper = new ConnectionHelper();
+            connectToDb = connectionHelper.getConnection();
+
+            //Create the query
+            for (int i = 0;  i<checkedSensors.size(); i++){
+                data_map = new SensorHashMap();
+
+                String dbGetSensorProtocolQuery = "SELECT DISTINCT time, pressure_KPa, id FROM TPMSData WHERE id ='"+ checkedSensors.get(i) +"'";
+                dbGetSensorProtocolQuery += " ORDER BY time ASC";
+                Statement st = connectToDb.createStatement();
+                ResultSet resSet = st.executeQuery(dbGetSensorProtocolQuery);
+
+                String id = "sample";
+                //Add last seen time to corresponding variable
+                while(resSet.next()){
+                    data_map.values.add(resSet.getFloat("pressure_KPa"));
+                    data_map.dates.add(resSet.getString("time"));
+                    id = resSet.getString("id");
+                }
+
+                this.map.put(id,data_map);
+            }
+
+            connectToDb.close();
+
+        }
+        catch (Exception ex){
+            Log.e("ERROR", String.valueOf(ex));
+            Utility.showToast(GraphActivity.this, "Could not retrieve last seen data, check internet connection");
+        }
+    }
+
+
+    void plotGraphData(){
+        if (graph_type.equals("pressure")) {
+            getPressureData(checkedSensors);
+        } else if (graph_type.equals("temperature")) {
+            getTemperatureData(checkedSensors);
+        } else {
+            Utility.showToast(GraphActivity.this, "Something went wrong in getting type of the graph");
+            finish();
+        }
+        data_plot.clear();
+        int idx = -1;
+        for (String key: map.keySet()) {
+            idx ++;
+            data_plot.setVisibility(View.VISIBLE);
+
+
+            data_plot.addSeries(new SimpleXYSeries(map.get(key).values,
+                    SimpleXYSeries.ArrayFormat.Y_VALS_ONLY,key),new LineAndPointFormatter(colours.get(idx).get(0),colours.get(idx).get(1),null,null));
+
+            data_plot.getGraph().getLineLabelStyle(XYGraphWidget.Edge.BOTTOM).setFormat(new Format() {
+                @Override
+                public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
+                    int i = (int) Math.round(((Number) obj).doubleValue());
+                    String[] time = map.get(key).dates.get(i).split(" ");
+                    return toAppendTo.append(time[1]);
+                }
+
+                @Override
+                public Object parseObject(String source, ParsePosition pos) {
+                    return null;
+                }
+            });
+
+
+        }
+
+
+        PanZoom.attach(data_plot, PanZoom.Pan.VERTICAL, PanZoom.Zoom.STRETCH_VERTICAL);
+
     }
 }
