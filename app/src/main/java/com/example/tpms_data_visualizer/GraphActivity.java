@@ -224,18 +224,15 @@ public class GraphActivity extends AppCompatActivity {
             for (int i = 0; i < all_dates_domain_list.size() ; i++) {
                 //Case 1 if the date has a correlated value
                 if (map.get(key).dates.contains(all_dates_domain_list.get(i))){
-                    Log.e("Error", "plm1");
                     int index_of_date = map.get(key).dates.indexOf(all_dates_domain_list.get(i));
                     augumented_values.add(map.get(key).values.get(index_of_date));
                 }
                 //Case 2 if the date has no correlated value and the we are working with the first index
                 else if (!map.get(key).dates.contains(all_dates_domain_list.get(i)) && i == 0){
-                    Log.e("Error", "plm2");
                     augumented_values.add((float) -1);
                 }
                 //Case 3 if the date has no correlated value and the we already have something in the list
                 else {
-                    Log.e("Error", "plm3");
                     augumented_values.add(augumented_values.get(augumented_values.size() - 1));
                 }
 
