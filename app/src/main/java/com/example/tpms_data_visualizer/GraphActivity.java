@@ -28,9 +28,12 @@ import java.time.Instant;
 import java.util.ArrayList;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Random;
+import java.util.Set;
 
 
 public class GraphActivity extends AppCompatActivity {
@@ -197,34 +200,81 @@ public class GraphActivity extends AppCompatActivity {
             finish();
         }
         data_plot.clear();
+
+        //Get all domain labels and sort them
+        //Make it a linked hash set so all values can be unique in their nature
+        ArrayList<String> all_dates_domain_list = new ArrayList<String>();
+        for (String key: map.keySet()) {
+            for (String date: map.get(key).dates) {
+                if (!all_dates_domain_list.contains(date)){
+                    all_dates_domain_list.add(date);
+                }
+            }
+        }
+
+        //Sort based on time so that the graph is correct in the end
+        Collections.sort(all_dates_domain_list);
+
+        //Augument existing data
+        for (String key: map.keySet()) {
+
+            //New ArrayList for the augumented values
+            ArrayList<Float> augumented_values = new ArrayList<Float>();
+
+            for (int i = 0; i < all_dates_domain_list.size() ; i++) {
+                //Case 1 if the date has a correlated value
+                if (map.get(key).dates.contains(all_dates_domain_list.get(i))){
+                    Log.e("Error", "plm1");
+                    int index_of_date = map.get(key).dates.indexOf(all_dates_domain_list.get(i));
+                    augumented_values.add(map.get(key).values.get(index_of_date));
+                }
+                //Case 2 if the date has no correlated value and the we are working with the first index
+                else if (!map.get(key).dates.contains(all_dates_domain_list.get(i)) && i == 0){
+                    Log.e("Error", "plm2");
+                    augumented_values.add((float) -1);
+                }
+                //Case 3 if the date has no correlated value and the we already have something in the list
+                else {
+                    Log.e("Error", "plm3");
+                    augumented_values.add(augumented_values.get(augumented_values.size() - 1));
+                }
+
+            }
+
+            //Replace old data with new one
+            map.get(key).values = augumented_values;
+
+
+        }
+
         int idx = -1;
         for (String key: map.keySet()) {
             idx ++;
             data_plot.setVisibility(View.VISIBLE);
 
-
             data_plot.addSeries(new SimpleXYSeries(map.get(key).values,
                     SimpleXYSeries.ArrayFormat.Y_VALS_ONLY,key),new LineAndPointFormatter(colours.get(idx).get(0),colours.get(idx).get(1),null,null));
-
-            data_plot.getGraph().getLineLabelStyle(XYGraphWidget.Edge.BOTTOM).setFormat(new Format() {
-                @Override
-                public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
-                    int i = (int) Math.round(((Number) obj).doubleValue());
-                    String[] time = map.get(key).dates.get(i).split(" ");
-                    return toAppendTo.append(time[1]);
-                }
-
-                @Override
-                public Object parseObject(String source, ParsePosition pos) {
-                    return null;
-                }
-            });
-
 
         }
 
 
-        PanZoom.attach(data_plot, PanZoom.Pan.VERTICAL, PanZoom.Zoom.STRETCH_VERTICAL);
+        //Generate graph and add all the domain lists on the x axis of the graph
+        data_plot.getGraph().getLineLabelStyle(XYGraphWidget.Edge.BOTTOM).setFormat(new Format() {
+            @Override
+            public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
+                int i = (int) Math.round(((Number) obj).doubleValue());
+                String[] time = all_dates_domain_list.get(i).split(" ");
+                return toAppendTo.append(time[1]);
+            }
+
+            @Override
+            public Object parseObject(String source, ParsePosition pos) {
+                return null;
+            }
+        });
+
+        data_plot.getOuterLimits().set(0, all_dates_domain_list.size()-1, -3, 200);
+        PanZoom.attach(data_plot);
 
     }
 }
