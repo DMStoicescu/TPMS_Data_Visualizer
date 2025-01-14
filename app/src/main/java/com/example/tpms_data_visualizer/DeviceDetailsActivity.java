@@ -154,7 +154,7 @@ public class DeviceDetailsActivity extends AppCompatActivity {
                 }
             }
             catch (Exception ex){
-                Utility.showToast(DeviceDetailsActivity.this, "Could not retrieve data, check internet connection");
+                Utility.showToast(DeviceDetailsActivity.this, "Could not retrieve data, check internet connection!");
             }
 
             //If there are any received sensorsID display them otherwise display dummy data
@@ -238,11 +238,11 @@ public class DeviceDetailsActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()){
                     //Which means that device is added
-                    Utility.showToast(DeviceDetailsActivity.this, "Device configured successfully!");
+                    Utility.showToast(DeviceDetailsActivity.this, "Vehicle configured successfully!");
                     finish();
                 }
                 else {
-                    Utility.showToast(DeviceDetailsActivity.this, "Failed to configure device!");
+                    Utility.showToast(DeviceDetailsActivity.this, "Failed to configure vehicle!");
                 }
             }
         });
@@ -257,11 +257,11 @@ public class DeviceDetailsActivity extends AppCompatActivity {
                 public void onComplete(@NonNull Task<Void> task) {
                     if(task.isSuccessful()){
                         //Which means that device is deleted
-                        Utility.showToast(DeviceDetailsActivity.this, "Device deleted!");
+                        Utility.showToast(DeviceDetailsActivity.this, "Vehicle deleted!");
                         finish();
                     }
                     else {
-                        Utility.showToast(DeviceDetailsActivity.this, "Failed to delete device!");
+                        Utility.showToast(DeviceDetailsActivity.this, "Failed to delete vehicle!");
                     }
                 }
             });
@@ -318,7 +318,7 @@ public class DeviceDetailsActivity extends AppCompatActivity {
 
         }
         catch (Exception ex){
-            Utility.showToast(DeviceDetailsActivity.this, "Could not retrieve modulation data, check internet connection");
+            Utility.showToast(DeviceDetailsActivity.this, "Could not retrieve modulation data, check internet connection!");
         }
     }
 
@@ -354,7 +354,7 @@ public class DeviceDetailsActivity extends AppCompatActivity {
             connectToDb.close();
         }
         catch (Exception ex){
-            Utility.showToast(DeviceDetailsActivity.this, "Could not retrieve protocol data, check internet connection");
+            Utility.showToast(DeviceDetailsActivity.this, "Could not retrieve protocol data, check internet connection!");
         }
     }
 
@@ -386,7 +386,7 @@ public class DeviceDetailsActivity extends AppCompatActivity {
             connectToDb.close();
         }
         catch (Exception ex){
-            Utility.showToast(DeviceDetailsActivity.this, "Could not retrieve last seen data, check internet connection");
+            Utility.showToast(DeviceDetailsActivity.this, "Could not retrieve last seen data, check internet connection!");
         }
     }
 
